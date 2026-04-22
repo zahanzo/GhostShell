@@ -1,5 +1,8 @@
 # 🛡️ GhostShell: Advanced Evasion & Persistence Toolkit
 
+https://github.com/user-attachments/assets/28340dde-fa4d-4a1a-b1a2-1a32ce38d0a3
+
+
 This repository contains a Proof of Concept (PoC) for a highly stealthy, fileless Reverse Shell developed in **C++20**. Designed as an offensive security research tool, this project demonstrates advanced interaction with the Windows API (Win32 and COM), focusing on in-memory execution, sandbox evasion, and privilege-escalated persistence.
 
 > ⚠️ **Security and Ethics Warning:** This project was created strictly for **educational and Information Security research purposes**. Using this tool on systems without prior consent is illegal. 
