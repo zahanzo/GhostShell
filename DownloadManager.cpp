@@ -22,7 +22,6 @@ std::string DownloadManager::FetchRemoteCommand(const std::string& url) {
     char buffer[4096];
     DWORD bytesRead = 0;
 
-    // Forma mais eficiente e segura de ler strings no C++ moderno
     while (InternetReadFile(hConnect, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
         response.append(buffer, bytesRead);
     }

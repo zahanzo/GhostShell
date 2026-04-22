@@ -34,12 +34,10 @@ void AntiSandbox::ExecuteHeavyDelay(long long iterations) {
     double dummy = 0.0;
     
     for (long long i = 0; i < iterations; ++i) {
-        // Operações que consomem CPU mas são determinísticas
         dummy += std::sin(i) * std::cos(i);
         dummy = std::sqrt(std::abs(dummy + 1.0));
     }
 
-    // Impede o compilador de otimizar e remover o loop
     if (dummy == 0.0001) { 
         std::cout << "Algo impossível aconteceu"; 
     }

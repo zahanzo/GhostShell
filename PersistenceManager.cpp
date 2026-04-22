@@ -30,7 +30,6 @@ bool PersistenceManager::CreateLogonTask(const std::wstring& taskName, const std
         ITaskDefinitionPtr pTask;
         hr = pService->NewTask(0, &pTask);
 
-        // --- MÁGICA 1: Bypassar restrições de Energia e Tempo ---
         ITaskSettingsPtr pSettings;
         hr = pTask->get_Settings(&pSettings);
         if (SUCCEEDED(hr)) {
@@ -41,7 +40,7 @@ bool PersistenceManager::CreateLogonTask(const std::wstring& taskName, const std
             pSettings->put_ExecutionTimeLimit(_bstr_t(L"PT0S"));      // Tempo limite = 0 (Roda para sempre)
         }
 
-        // --- MÁGICA 2: Garantir Execução com Privilégios ---
+        
         IPrincipalPtr pPrincipal;
         hr = pTask->get_Principal(&pPrincipal);
         if (SUCCEEDED(hr)) {
