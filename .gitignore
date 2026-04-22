@@ -7,6 +7,11 @@
 *.o
 *.obj
 
+# folders
+include/
+Screenshots/
+.vscode
+
 # Precompiled Headers
 *.gch
 *.pch

